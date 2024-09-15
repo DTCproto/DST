@@ -1,3 +1,153 @@
 # This is a basic workflow to help you get started with Actions
 
 name: BUILD_BY_MANUAL
+
+on:
+  workflow_dispatch:
+    inputs:
+      dst_go_branch:
+        description: "指定dst-admin-go分支"
+        required: true
+        default: "main"
+        type: choice
+        options:
+          - "main"
+      dst_go_commit_id:
+        description: "指定dst-admin-go使用commit id版本"
+        required: true
+        default: "HEAD~0"
+        type: string
+      dst_web_branch:
+        description: "指定dst-manage-web分支"
+        required: true
+        default: "main"
+        type: choice
+        options:
+          - "main"
+      dst_web_commit_id:
+        description: "指定dst-manage-web使用commit id版本"
+        required: true
+        default: "HEAD~0"
+        type: string
+      release_archives:
+        description: "enable release archives"
+        default: false
+        type: boolean
+
+concurrency:
+  group: ${{ github.workflow }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [linux]
+        arch: [amd64]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.19"
+      - name: Install gomobile
+        run: |
+          go install golang.org/x/mobile/cmd/gomobile@latest
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: git clone dst-admin-go
+        run: |
+          mkdir -p ${{ github.workspace }}/build
+          cd ${{ github.workspace }}/build
+          git clone -b ${{ inputs.dst_go_branch }} https://github.com/carrot-hu23/dst-admin-go.git
+          cd ${{ github.workspace }}/build/dst-admin-go
+          git reset --hard ${{ inputs.dst_go_commit_id }}
+          echo "dst_admin_go_sha_short=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
+
+      - name: git clone dst-manage-web
+        run: |
+          mkdir -p ${{ github.workspace }}/build
+          cd ${{ github.workspace }}/build
+          git clone -b ${{ inputs.dst_go_branch }} https://github.com/carrot-hu23/dst-manage-web.git
+          cd ${{ github.workspace }}/build/dst-manage-web
+          git reset --hard ${{ inputs.dst_web_commit_id }}
+
+      - name: build dst-admin-go
+        run: |
+          cd ${{ github.workspace }}/build/dst-admin-go
+          go mod tidy
+          go get -u
+          GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} CGO_ENABLED=0 go build -o dst-admin-go -ldflags "-s -w" -v
+      
+      - name: build dst-manage-web
+        run: |
+          cd ${{ github.workspace }}/build/dst-manage-web
+          npm install
+          npm run build
+
+      - name: copy build result files
+        run: |
+          mkdir -p ${{ github.workspace }}/build/result/app
+          cp -rf ${{ github.workspace }}/build/dst-admin-go/dst-admin-go ${{ github.workspace }}/build/result/app/dst-admin-go
+          cp -rf ${{ github.workspace }}/build/dst-admin-go/config.yml ${{ github.workspace }}/build/result/app/config.yml
+          cp -rf ${{ github.workspace }}/build/dst-admin-go/static ${{ github.workspace }}/build/result/app/static
+          cp -rf ${{ github.workspace }}/build/dst-manage-web/build ${{ github.workspace }}/build/result/app/dist
+
+      - name: show build result files
+        run: |
+          ls -R ${{ github.workspace }}/build/result/app
+
+      - name: 7-Zip dst-admin binaries
+        run: |
+          7z a -mx9 ${{ github.workspace }}/temp/dst-admin-${{ matrix.os }}-${{ matrix.arch }}-${{ env.dst_admin_go_sha_short }}.7z ${{ github.workspace }}/build/result/app
+
+      - name: show zip files
+        run: |
+          ls -R ${{ github.workspace }}/temp
+
+      - name: Upload dst-admin binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: dst-admin-${{ matrix.os }}-${{ matrix.arch }}-${{ env.dst_admin_go_sha_short }}
+          compression-level: 9
+          path: |
+            ${{ github.workspace }}/temp/*
+          if-no-files-found: error
+
+  release:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get current date time
+        run: |
+          echo "current_date_time=$(date +'%Y-%m-%d-%H-%M')" >> "$GITHUB_ENV"
+
+      - name: Download dst-admin archives
+        uses: actions/download-artifact@v4
+        if: ${{ inputs.release_archives }}
+        with:
+          pattern: dst-admin-*
+          merge-multiple: true
+          path: ${{ github.workspace }}/archives
+
+      - name: show zip files
+        if: ${{ inputs.release_archives }}
+        run: |
+          ls -R ${{ github.workspace }}/archives
+
+      - name: Release dst-admin archives
+        uses: softprops/action-gh-release@v2
+        if: ${{ inputs.release_archives }}
+        with:
+          tag_name: "V1-${{ env.current_date_time }}"
+          name: "V1-${{ env.current_date_time }}"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          prerelease: false
+          body: "dst-admin-go libs."
+          files: |
+            ${{ github.workspace }}/archives/**
