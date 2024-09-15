@@ -55,11 +55,11 @@ jobs:
         run: |
           go install golang.org/x/mobile/cmd/gomobile@latest
           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
-      
+
       - uses: actions/setup-node@v4
         with:
-          node-version: '18'
-      
+          node-version: "18"
+
       - name: git clone dst-admin-go
         run: |
           mkdir -p ${{ github.workspace }}/build
@@ -83,7 +83,7 @@ jobs:
           go mod tidy
           go get -u
           GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} CGO_ENABLED=0 go build -o dst-admin-go -ldflags "-s -w" -v
-      
+
       - name: build dst-manage-web
         run: |
           cd ${{ github.workspace }}/build/dst-manage-web
