@@ -81,6 +81,8 @@ jobs:
           GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} CGO_ENABLED=0 go build -o dst-admin-go -ldflags "-s -w" -v
 
       - name: build dst-manage-web
+        env:
+          CI: false
         run: |
           cd ${{ github.workspace }}/build/dst-manage-web
           npm install
