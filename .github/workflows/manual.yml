@@ -107,7 +107,7 @@ jobs:
 
       - name: 7-Zip dst-admin binaries
         run: |
-          7z a -mx9 ${{ github.workspace }}/temp/dst-admin-${{ matrix.os }}-${{ matrix.arch }}-${{ env.dst_admin_go_sha_short }}.7z ${{ github.workspace }}/build/result/app
+          7z a -mx9 ${{ github.workspace }}/temp/dst-admin-${{ matrix.os }}-${{ matrix.arch }}.7z ${{ github.workspace }}/build/result/app
 
       - name: show zip files
         run: |
