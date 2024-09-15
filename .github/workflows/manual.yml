@@ -31,7 +31,7 @@ on:
         type: string
       release_archives:
         description: "enable release archives"
-        default: false
+        default: true
         type: boolean
 
 concurrency:
@@ -72,6 +72,11 @@ jobs:
           git clone -b ${{ inputs.dst_go_branch }} https://github.com/carrot-hu23/dst-manage-web.git
           cd ${{ github.workspace }}/build/dst-manage-web
           git reset --hard ${{ inputs.dst_web_commit_id }}
+
+      - name: remove ads
+        run: |
+          sed -i 's/115.159.49.206/127.0.0.1/g' ${{ github.workspace }}/build/dst-manage-web/.env.development
+          cp -rf ${{ github.workspace }}/ext/Ad/* ${{ github.workspace }}/build/dst-manage-web/src/pages/Ad/
 
       - name: build dst-admin-go
         run: |
