@@ -76,7 +76,6 @@ jobs:
       - name: build dst-admin-go
         run: |
           cd ${{ github.workspace }}/build/dst-admin-go
-          go mod tidy
           go get -u
           GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} CGO_ENABLED=0 go build -o dst-admin-go -ldflags "-s -w" -v
 
