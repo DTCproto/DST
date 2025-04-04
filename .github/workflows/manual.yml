@@ -69,14 +69,14 @@ jobs:
         run: |
           mkdir -p ${{ github.workspace }}/build
           cd ${{ github.workspace }}/build
-          git clone -b ${{ inputs.dst_go_branch }} https://github.com/carrot-hu23/dst-manage-web.git
-          cd ${{ github.workspace }}/build/dst-manage-web
+          git clone -b ${{ inputs.dst_go_branch }} https://github.com/carrot-hu23/dst-manage-web2.git
+          cd ${{ github.workspace }}/build/dst-manage-web2
           git reset --hard ${{ inputs.dst_web_commit_id }}
 
       - name: remove ads
         run: |
-          sed -i 's/115.159.49.206/127.0.0.1/g' ${{ github.workspace }}/build/dst-manage-web/.env.development
-          cp -rf ${{ github.workspace }}/ext/Ad/* ${{ github.workspace }}/build/dst-manage-web/src/pages/Ad/
+          sed -i 's/139.159.184.218/127.0.0.1/g' ${{ github.workspace }}/build/dst-manage-web2/vite.config.ts
+          cp -rf ${{ github.workspace }}/ext/Ad/* ${{ github.workspace }}/build/dst-manage-web2/src/pages/Ad/
 
       - name: build dst-admin-go
         run: |
@@ -89,7 +89,7 @@ jobs:
         env:
           CI: false
         run: |
-          cd ${{ github.workspace }}/build/dst-manage-web
+          cd ${{ github.workspace }}/build/dst-manage-web2
           npm install
           npm run build
 
@@ -99,7 +99,7 @@ jobs:
           cp -rf ${{ github.workspace }}/build/dst-admin-go/dst-admin-go ${{ github.workspace }}/build/result/app/dst-admin-go
           cp -rf ${{ github.workspace }}/build/dst-admin-go/config.yml ${{ github.workspace }}/build/result/app/config.yml
           cp -rf ${{ github.workspace }}/build/dst-admin-go/static ${{ github.workspace }}/build/result/app/static
-          cp -rf ${{ github.workspace }}/build/dst-manage-web/build ${{ github.workspace }}/build/result/app/dist
+          cp -rf ${{ github.workspace }}/build/dst-manage-web2/build ${{ github.workspace }}/build/result/app/dist
 
       - name: show build result files
         run: |
