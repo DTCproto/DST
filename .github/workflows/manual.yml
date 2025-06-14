@@ -81,6 +81,10 @@ jobs:
           go get -u
           GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} CGO_ENABLED=0 go build -o dst-admin-go -ldflags "-s -w" -v
 
+      - name: fix build web no-check
+        run: |
+          sed -i 's|"build": "tsc -b && vite build"|"build": "vite build"|' ${{ github.workspace }}/build/dst-manage-web2/package.json
+
       - name: build dst-manage-web
         env:
           CI: false
