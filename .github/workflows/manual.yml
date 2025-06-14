@@ -5,25 +5,15 @@ name: BUILD_BY_MANUAL
 on:
   workflow_dispatch:
     inputs:
-      dst_go_branch:
-        description: "指定dst-admin-go分支"
-        required: true
-        default: "main"
-        type: string
       dst_go_commit_id:
         description: "指定dst-admin-go使用commit id版本"
         required: true
-        default: "HEAD~0"
-        type: string
-      dst_web_branch:
-        description: "指定dst-manage-web分支"
-        required: true
-        default: "main"
+        default: "1.5.0"
         type: string
       dst_web_commit_id:
         description: "指定dst-manage-web使用commit id版本"
         required: true
-        default: "HEAD~0"
+        default: "1.5.1-cdn"
         type: string
       release_archives:
         description: "enable release archives"
@@ -56,18 +46,18 @@ jobs:
         run: |
           mkdir -p ${{ github.workspace }}/build
           cd ${{ github.workspace }}/build
-          git clone -b ${{ inputs.dst_go_branch }} https://github.com/carrot-hu23/dst-admin-go.git
+          git clone https://github.com/carrot-hu23/dst-admin-go.git
           cd ${{ github.workspace }}/build/dst-admin-go
-          git reset --hard ${{ inputs.dst_go_commit_id }}
+          git checkout --force --quiet ${{ inputs.dst_go_commit_id }}
           echo "dst_admin_go_sha_short=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
 
       - name: git clone dst-manage-web
         run: |
           mkdir -p ${{ github.workspace }}/build
           cd ${{ github.workspace }}/build
-          git clone -b ${{ inputs.dst_web_branch }} https://github.com/carrot-hu23/dst-manage-web2.git
+          git clone https://github.com/carrot-hu23/dst-manage-web2.git
           cd ${{ github.workspace }}/build/dst-manage-web2
-          git reset --hard ${{ inputs.dst_web_commit_id }}
+          git checkout --force --quiet ${{ inputs.dst_web_commit_id }}
 
       - name: remove ads
         run: |
