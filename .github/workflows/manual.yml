@@ -9,9 +9,7 @@ on:
         description: "指定dst-admin-go分支"
         required: true
         default: "main"
-        type: choice
-        options:
-          - "main"
+        type: string
       dst_go_commit_id:
         description: "指定dst-admin-go使用commit id版本"
         required: true
@@ -21,9 +19,7 @@ on:
         description: "指定dst-manage-web分支"
         required: true
         default: "main"
-        type: choice
-        options:
-          - "main"
+        type: string
       dst_web_commit_id:
         description: "指定dst-manage-web使用commit id版本"
         required: true
