@@ -65,7 +65,7 @@ jobs:
         run: |
           mkdir -p ${{ github.workspace }}/build
           cd ${{ github.workspace }}/build
-          git clone -b ${{ inputs.dst_go_branch }} https://github.com/carrot-hu23/dst-manage-web2.git
+          git clone -b ${{ inputs.dst_web_branch }} https://github.com/carrot-hu23/dst-manage-web2.git
           cd ${{ github.workspace }}/build/dst-manage-web2
           git reset --hard ${{ inputs.dst_web_commit_id }}
 
