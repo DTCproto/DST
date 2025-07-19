@@ -8,7 +8,7 @@ on:
       dst_go_commit_id:
         description: "指定dst-admin-go使用commit id版本"
         required: true
-        default: "1.5.0"
+        default: "1.5.1"
         type: string
       dst_web_commit_id:
         description: "指定dst-manage-web使用commit id版本"
