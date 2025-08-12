@@ -121,7 +121,7 @@ jobs:
           echo "current_date_time=$(date +'%Y-%m-%d-%H-%M')" >> "$GITHUB_ENV"
 
       - name: Download dst-admin archives
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         if: ${{ inputs.release_archives }}
         with:
           pattern: dst-admin-*
