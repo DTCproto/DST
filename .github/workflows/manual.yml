@@ -8,12 +8,12 @@ on:
       dst_go_commit_id:
         description: "指定dst-admin-go使用commit id版本"
         required: true
-        default: "1.5.1"
+        default: "main"
         type: string
       dst_web_commit_id:
         description: "指定dst-manage-web使用commit id版本"
         required: true
-        default: "1.5.1-cdn"
+        default: "main"
         type: string
       release_archives:
         description: "enable release archives"
@@ -36,7 +36,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version: "1.24"
+          go-version: "1.20"
 
       - uses: actions/setup-node@v5
         with:
