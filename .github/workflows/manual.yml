@@ -26,10 +26,20 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      attestations: write
+      id-token: write
+    outputs:
+      core_short_commit_id: ${{ steps.set_global_params.outputs.core_short_commit_id }}
+      web_short_commit_id: ${{ steps.set_global_params.outputs.web_short_commit_id }}
+      core_current_branch: ${{ steps.set_global_params.outputs.core_current_branch }}
+      web_current_branch: ${{ steps.set_global_params.outputs.web_current_branch }}
     strategy:
       matrix:
         os: [linux]
-        arch: [amd64]
+        arch: [amd64,arm64]
     steps:
       - uses: actions/checkout@v5
 
@@ -49,7 +59,6 @@ jobs:
           git clone https://github.com/carrot-hu23/dst-admin-go.git
           cd ${{ github.workspace }}/build/dst-admin-go
           git checkout --force --quiet ${{ inputs.dst_go_commit_id }}
-          echo "dst_admin_go_sha_short=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
 
       - name: git clone dst-manage-web
         run: |
@@ -58,6 +67,16 @@ jobs:
           git clone https://github.com/carrot-hu23/dst-manage-web2.git
           cd ${{ github.workspace }}/build/dst-manage-web2
           git checkout --force --quiet ${{ inputs.dst_web_commit_id }}
+
+      - name: set global params
+        id: set_global_params
+        run: |
+          cd ${{ github.workspace }}/build/dst-admin-go
+          echo "core_short_commit_id=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          echo "core_current_branch=$(git branch --show-current)" >> "$GITHUB_OUTPUT"
+          cd ${{ github.workspace }}/build/dst-manage-web2
+          echo "web_short_commit_id=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          echo "web_current_branch=$(git branch --show-current)" >> "$GITHUB_OUTPUT"
 
       - name: remove ads
         run: |
@@ -106,7 +125,7 @@ jobs:
       - name: Upload dst-admin binaries
         uses: actions/upload-artifact@v4
         with:
-          name: dst-admin-${{ matrix.os }}-${{ matrix.arch }}-${{ env.dst_admin_go_sha_short }}
+          name: dst-admin-${{ matrix.os }}-${{ matrix.arch }}-${{ env.core_short_commit_id }}
           compression-level: 9
           path: |
             ${{ github.workspace }}/temp/*
@@ -141,6 +160,9 @@ jobs:
           name: "V1-${{ env.current_date_time }}"
           token: ${{ secrets.GITHUB_TOKEN }}
           prerelease: false
-          body: "dst-admin-go libs."
+          body: |
+            dst server libs.
+            dst-admin-go from [${{ needs.build.outputs.core_current_branch }}] [${{ needs.build.outputs.core_short_commit_id }}]
+            dst-manage-web2 from [${{ needs.build.outputs.web_current_branch }}] [${{ needs.build.outputs.web_short_commit_id }}]
           files: |
             ${{ github.workspace }}/archives/**
