@@ -125,7 +125,7 @@ jobs:
       - name: Upload dst-admin binaries
         uses: actions/upload-artifact@v4
         with:
-          name: dst-admin-${{ matrix.os }}-${{ matrix.arch }}-${{ env.core_short_commit_id }}
+          name: dst-admin-${{ matrix.os }}-${{ matrix.arch }}
           compression-level: 9
           path: |
             ${{ github.workspace }}/temp/*
