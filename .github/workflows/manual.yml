@@ -153,7 +153,7 @@ jobs:
           ls -R ${{ github.workspace }}/archives
 
       - name: Release dst-admin archives
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         if: ${{ inputs.release_archives }}
         with:
           tag_name: "V1-${{ env.current_date_time }}"
